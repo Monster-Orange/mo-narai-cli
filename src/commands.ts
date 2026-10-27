@@ -3,9 +3,13 @@
 import Build from "./commands/build.js";
 import Dev from "./commands/dev.js";
 import Init from "./commands/init.js";
+import Login from "./commands/login.js";
+import Logout from "./commands/logout.js";
 import Validate from "./commands/validate.js";
 
 export const COMMANDS = {
+  login: Login,
+  logout: Logout,
   init: Init,
   validate: Validate,
   build: Build,
