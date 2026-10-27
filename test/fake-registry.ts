@@ -40,8 +40,9 @@ export async function fakeRegistry(): Promise<FakeRegistry> {
     if (parts.length === 1 && method === "POST") {
       const id = `${publisher}/${(JSON.parse(body.toString()) as { name: string }).name}`;
       if (state.tools.has(id)) return refuse(409, "tool_exists", "registered already");
-      state.tools.set(id, { id, name: id.split("/")[1] ?? "", versions: new Map() });
-      return { status: 201, body: out(state.tools.get(id)!) };
+      const created = { id, name: id.split("/")[1] ?? "", versions: new Map() };
+      state.tools.set(id, created);
+      return { status: 201, body: out(created) };
     }
     const tool = state.tools.get(`${publisher}/${name}`);
     if (!tool) return refuse(404, "not_found", "no such tool");
