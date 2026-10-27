@@ -7,7 +7,7 @@ import { scratch } from "./run.js";
 
 describe("the bundle digest", () => {
   it("is the registry's: sha256 over the file list's canonical JSON", () => {
-    // computed by Narai's rule (narai/tools/manifest.py bundle_digest) on the same rows
+    // computed by Narai's registry rule (Python's json.dumps, sorted keys, no spaces) on the same rows
     const rows = [
       { path: "a/b.js", sha256: "0".repeat(64), size: 3 },
       { path: "é/ü.txt", sha256: "f".repeat(64), size: 0 },
