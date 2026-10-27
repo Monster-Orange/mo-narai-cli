@@ -7,7 +7,10 @@
 - `narai validate`: the manifest against the contract, as Narai's registry checks it.
 - `narai build`: the release, with a sha256 digest of every file.
 - `narai dev`: the tool in the local harness, mounted as a lesson mounts it.
-- `narai tools register | push | list`: the registry, with plan and apply.
+- `narai tools register | push | list`: the registry. `register` sets up your publisher (once per organization) and
+  the tool; `push` uploads the sealed build as a draft version, once per version. Both plan, then apply after a
+  confirmation: `--plan` only shows the changes, and with `--detailed-exitcode` exits 2 when there are some (0 when
+  there are none). In CI, `NARAI_TOKEN` (a tool's token) and `--yes`.
 
 Every command takes `--json`, `--yes` and `--no-input`. Results go to stdout, progress to stderr. Exit codes: 0 ok,
 1 error, 2 usage, 3 auth.

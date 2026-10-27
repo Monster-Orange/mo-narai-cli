@@ -5,6 +5,9 @@ import Dev from "./commands/dev.js";
 import Init from "./commands/init.js";
 import Login from "./commands/login.js";
 import Logout from "./commands/logout.js";
+import ToolsList from "./commands/tools/list.js";
+import ToolsPush from "./commands/tools/push.js";
+import ToolsRegister from "./commands/tools/register.js";
 import Validate from "./commands/validate.js";
 
 export const COMMANDS = {
@@ -14,4 +17,7 @@ export const COMMANDS = {
   validate: Validate,
   build: Build,
   dev: Dev,
+  "tools:register": ToolsRegister,
+  "tools:push": ToolsPush,
+  "tools:list": ToolsList,
 };

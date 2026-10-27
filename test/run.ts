@@ -36,3 +36,13 @@ export function naraiServe(args: string[], cwd: string): Promise<{ result: Recor
 }
 
 export const scratch = (): string => mkdtempSync(join(tmpdir(), "narai-cli-"));
+
+/** `narai` without blocking this process: for tests whose server (a fake Narai) runs here too. */
+export function naraiAsync(args: string[], cwd: string, env: Record<string, string> = {}): Promise<Ran> {
+  const child = spawn(process.execPath, [BIN, ...args], { cwd, env: { ...process.env, NO_COLOR: "1", ...env }, stdio: ["ignore", "pipe", "pipe"] });
+  let stdout = "";
+  let stderr = "";
+  child.stdout.on("data", (d: Buffer) => { stdout += d.toString(); });
+  child.stderr.on("data", (d: Buffer) => { stderr += d.toString(); });
+  return new Promise((resolve) => child.once("close", (status) => resolve({ status, stdout, stderr })));
+}
