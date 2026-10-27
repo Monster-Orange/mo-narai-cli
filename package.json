@@ -43,7 +43,7 @@
   },
   "dependencies": {
     "@inquirer/confirm": "6.3.3",
-    "@michinarai/sdk": "github:Monster-Orange/mo-narai-sdk#898cb0d1ceef14d5e8f3e288e178e38e9d03ba05",
+    "@michinarai/sdk": "github:Monster-Orange/mo-narai-sdk#1380b84013962f64ee9ab9f719cd324ce8a02d0a",
     "@napi-rs/keyring": "2.1.1",
     "@oclif/core": "5.1.7",
     "openapi-fetch": "0.17.0"
