@@ -3,7 +3,15 @@
   "version": "0.0.0",
   "description": "The narai command: scaffold, validate, build, run and register tools for Narai lessons.",
   "license": "UNLICENSED",
-  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Monster-Orange/mo-narai-cli.git"
+  },
+  "homepage": "https://github.com/Monster-Orange/mo-narai-cli#readme",
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
   "type": "module",
   "bin": {
     "narai": "./bin/run.js"
