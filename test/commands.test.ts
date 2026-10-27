@@ -67,7 +67,18 @@ describe("narai validate", () => {
   it("passes the template's manifest", () => {
     const r = narai(["validate", "--json"], tool());
     expect(r.status).toBe(0);
-    expect(JSON.parse(r.stdout)).toEqual({ ok: true, id: "narai-dev/echo", version: "0.1.0" });
+    expect(JSON.parse(r.stdout)).toEqual({ ok: true, id: "narai-dev/echo", version: "0.1.0", warnings: [] });
+  });
+
+  it("warns when a payload schema names `schema`", () => {
+    const root = tool();
+    const path = join(root, "narai.tool.json");
+    const m = JSON.parse(readFileSync(path, "utf8")) as { payloads: Record<string, { required: string[] }> };
+    m.payloads["echo.answer@1"]?.required.push("schema");
+    writeFileSync(path, JSON.stringify(m));
+    const r = narai(["validate", "--json"], root);
+    expect(r.status).toBe(0);
+    expect((JSON.parse(r.stdout) as { warnings: string[] }).warnings).toEqual([expect.stringContaining("/payloads/echo.answer@1 names `schema`")]);
   });
 
   it("fails with every reason, the registry's rules included", () => {

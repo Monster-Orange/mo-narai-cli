@@ -36,7 +36,7 @@
   "dependencies": {
     "@inquirer/confirm": "6.3.3",
     "@napi-rs/keyring": "2.1.1",
-    "@narai/sdk": "github:Monster-Orange/mo-narai-sdk#b85c963c23c8bee9e8176d4fe1cbee70669da01c",
+    "@narai/sdk": "github:Monster-Orange/mo-narai-sdk#bab481635f386a415a0926cca4d4dc45d04b28a3",
     "@oclif/core": "5.1.7"
   },
   "devDependencies": {
