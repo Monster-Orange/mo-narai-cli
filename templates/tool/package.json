@@ -1,0 +1,14 @@
+{
+  "name": "{{name}}",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs && narai build",
+    "dev": "npm run build && narai dev",
+    "validate": "narai validate"
+  },
+  "dependencies": {
+    "@michinarai/sdk": "{{sdk}}"
+  }
+}

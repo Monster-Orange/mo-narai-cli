@@ -1,9 +1,16 @@
 {
-  "name": "@narai/cli",
+  "name": "@michinarai/cli",
   "version": "0.0.0",
   "description": "The narai command: scaffold, validate, build, run and register tools for Narai lessons.",
-  "license": "UNLICENSED",
-  "private": true,
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Monster-Orange/mo-narai-cli.git"
+  },
+  "homepage": "https://github.com/Monster-Orange/mo-narai-cli#readme",
+  "publishConfig": {
+    "access": "public"
+  },
   "type": "module",
   "bin": {
     "narai": "./bin/run.js"
@@ -31,16 +38,22 @@
     "prepare": "npm run build",
     "typecheck": "tsc --noEmit",
     "lint": "eslint . --max-warnings=0",
-    "test": "vitest run"
+    "test": "vitest run",
+    "generate": "openapi-typescript node_modules/@michinarai/sdk/schema/openapi.tools.json --output src/generated/api.ts"
   },
   "dependencies": {
-    "@oclif/core": "5.1.7"
+    "@inquirer/confirm": "6.3.3",
+    "@michinarai/sdk": "github:Monster-Orange/mo-narai-sdk#73187e28c0047558e8662394554f225b3e335a2a",
+    "@napi-rs/keyring": "2.1.1",
+    "@oclif/core": "5.1.7",
+    "openapi-fetch": "0.17.0"
   },
   "devDependencies": {
     "@eslint/js": "9.39.5",
     "@types/node": "22.20.5",
     "eslint": "9.39.5",
     "globals": "14.0.0",
+    "openapi-typescript": "7.13.0",
     "typescript": "5.9.3",
     "typescript-eslint": "8.72.1",
     "vitest": "3.2.7"
