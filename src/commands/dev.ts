@@ -1,7 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { Flags } from "@oclif/core";
-import { startHarness, type HarnessOptions } from "@narai/sdk/harness";
+import { startHarness, type HarnessOptions } from "@michinarai/sdk/harness";
 import { NaraiCommand } from "../base-command.js";
 import { NaraiError } from "../lib/errors.js";
 import { checkedManifest, toolRoot } from "../lib/project.js";

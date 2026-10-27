@@ -1,5 +1,5 @@
 // {{name}}: a Narai tool. It shows the learner something to do and reports what they did; Narai judges.
-import { connect } from "@narai/sdk";
+import { connect } from "@michinarai/sdk";
 
 const $ = (id) => document.getElementById(id);
 const manifest = await (await fetch("./narai.tool.json")).json();

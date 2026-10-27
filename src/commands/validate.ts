@@ -1,4 +1,4 @@
-import { manifestWarnings } from "@narai/sdk";
+import { manifestWarnings } from "@michinarai/sdk";
 import { NaraiCommand } from "../base-command.js";
 import { NaraiError } from "../lib/errors.js";
 import { MANIFEST, checkedManifest, readManifest, toolRoot } from "../lib/project.js";

@@ -1,6 +1,6 @@
-# @narai/cli
+# @michinarai/cli
 
-`narai`: the command line for building tools that run inside Narai lessons, on the public `@narai/sdk`.
+`narai`: the command line for building tools that run inside Narai lessons, on the public `@michinarai/sdk`.
 
 - `narai login`: sign in to Narai (in the browser; the session stays in the OS keychain).
 - `narai init`: a new tool from the template, with its `AGENTS.md` and skills.
@@ -20,3 +20,41 @@ npm test
 npm run lint
 npm run typecheck
 ```
+
+## Releasing
+
+npm's trusted publishing only: no npm token, in CI or anywhere else. The workflow is `.github/workflows/release.yml`.
+
+**Every release.** Set `version` in package.json, merge it, and push the tag `v<version>`. The workflow runs the
+gates, packs the tarball and its `SHA256SUMS`, and **stages** it on npm over OIDC (`npm stage publish`). It also makes
+a GitHub release with both files. Nothing is public until Ward approves it on npm, with 2FA:
+
+```sh
+npm stage list @michinarai/cli
+npm stage approve <stage-id>
+```
+
+**Before the first release**, the CLI must depend on `@michinarai/sdk` from npm: the workflow refuses a git, file
+or URL dependency, so publish the SDK first and move the dependency to its version.
+
+**The first publish of the package, once.** Trusted publishing can't create a package, so Ward publishes the first
+version by hand from his machine:
+
+1. Run the workflow by hand (Actions › release › Run workflow). It's a dry run, and it keeps the tarball and
+   `SHA256SUMS` as the `release` artifact. Download it.
+2. In that folder: `sha256sum -c SHA256SUMS` (on a Mac, `shasum -a 256 -c SHA256SUMS`), then
+   `npm login --auth-type=web && npm publish <tarball> --access public && npm logout`.
+3. On npmjs.com, the package › Settings › Trusted publisher › GitHub Actions: organization `Monster-Orange`, repository
+   `mo-narai-cli`, workflow `release.yml`, with staged publishing allowed. Or, with npm 11.15 or later:
+   `npm trust github @michinarai/cli --file release.yml --repo Monster-Orange/mo-narai-cli --allow-stage-publish`.
+4. The same page › Publishing access: **Require two-factor authentication and disallow tokens**. Trusted publishing
+   still works.
+
+Mind:
+
+- The trusted-publisher fields are case-sensitive, and npm doesn't check them when they're saved. A mismatch fails
+  only at publish time, as an `E404` that looks like a missing package. package.json's `repository.url` must be this
+  repository exactly.
+- A new trusted-publisher configuration must publish (or stage) within 2 days, or it expires.
+- The repository is private, so packages ship **without provenance**. Provenance turns on by itself (no flag) if the
+  repository and the package are both public.

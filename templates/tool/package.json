@@ -9,6 +9,6 @@
     "validate": "narai validate"
   },
   "dependencies": {
-    "@narai/sdk": "{{sdk}}"
+    "@michinarai/sdk": "{{sdk}}"
   }
 }

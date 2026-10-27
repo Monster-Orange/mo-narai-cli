@@ -1,6 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
-import { manifestProblems, type ToolManifest } from "@narai/sdk";
+import { manifestProblems, type ToolManifest } from "@michinarai/sdk";
 import { NaraiError } from "./errors.js";
 
 /** A tool's manifest, at the root of its repository. */

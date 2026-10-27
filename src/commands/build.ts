@@ -1,7 +1,7 @@
 import { stat, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { Flags } from "@oclif/core";
-import { manifestProblems } from "@narai/sdk";
+import { manifestProblems } from "@michinarai/sdk";
 import { NaraiCommand } from "../base-command.js";
 import { bundleDigest, digestFiles } from "../lib/digest.js";
 import { NaraiError } from "../lib/errors.js";

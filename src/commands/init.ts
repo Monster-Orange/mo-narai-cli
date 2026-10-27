@@ -2,7 +2,7 @@ import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { Args, Flags } from "@oclif/core";
-import { manifestProblems } from "@narai/sdk";
+import { manifestProblems } from "@michinarai/sdk";
 import { NaraiCommand } from "../base-command.js";
 import { NaraiError } from "../lib/errors.js";
 import { MANIFEST } from "../lib/project.js";
@@ -19,7 +19,7 @@ async function walk(dir: string): Promise<string[]> {
 /** The SDK the template depends on: the one this CLI is built with. */
 async function sdkSpec(): Promise<string> {
   const pkg = JSON.parse(await readFile(fileURLToPath(new URL("../../package.json", import.meta.url)), "utf8")) as { dependencies: Record<string, string> };
-  return pkg.dependencies["@narai/sdk"] ?? "^1";
+  return pkg.dependencies["@michinarai/sdk"] ?? "^1";
 }
 
 export default class Init extends NaraiCommand<typeof Init> {
