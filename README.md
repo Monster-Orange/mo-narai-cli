@@ -72,6 +72,24 @@ narai login            # or --no-browser, to print the address instead
 narai logout
 ```
 
+**`narai tools register`**, **`push`** and **`list`** work with Narai's registry; sign in first. `register` sets up your
+publisher (once per organization) and the tool. `push` uploads the sealed build (`narai build`'s `dist/`) as a draft
+version, once per version: the same build again changes nothing, and a different build under the same version is
+refused (raise the version). Both plan, then apply after a confirmation. `--plan` only shows the changes, and with
+`--detailed-exitcode` it exits 2 when there are some, 0 when there are none. In CI, set `NARAI_TOKEN` (a tool's token)
+and pass `--yes`.
+
+```sh
+narai tools register --org "Your Org" --plan   # what would change
+narai tools register
+narai tools push
+narai tools list --publisher you
+```
+
+Today a tool is self-hosted: `surfaces.embed.url` is its own `https://` address. Bundles hosted by Narai (a relative
+`embed.url`, such as `index.html`) need a newer Narai. A command that reaches a Narai without the route it needs says
+so and stops; it changes nothing.
+
 ## Develop
 
 ```sh
