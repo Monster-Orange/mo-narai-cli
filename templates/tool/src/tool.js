@@ -19,3 +19,14 @@ $("say").onclick = () => {
 $("drill").onclick = () => {
   tool.practice("drill", { duration_s: 30, attempts: 1, payload: { schema: manifest.practice.drill, rounds: 1 } });
 };
+
+// The microphone is the step's to grant, launch by launch (tool.start.granted), and only when the manifest declares it
+// (capabilities.microphone: true). Without the grant the frame can't open it: show no control for it.
+if (tool.start.granted?.includes("microphone")) {
+  $("mic").hidden = false;
+  $("mic").onclick = async () => {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    // listen here, then report what was played (an answer payload such as music.played@1), never whether it's right
+    stream.getTracks().forEach((t) => t.stop());
+  };
+}

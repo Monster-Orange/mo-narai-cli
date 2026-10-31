@@ -5,7 +5,7 @@ import { MANIFEST, checkedManifest, readManifest, toolRoot } from "../lib/projec
 
 export default class Validate extends NaraiCommand<typeof Validate> {
   static override summary = `Check ${MANIFEST} against the contract, as Narai's registry does.`;
-  static override description = "The schema, then what a schema can't say: every payload a manifest names is declared, no answer payload carries a verdict, commands and answers need an embed that runs the SDK, files sorted by path.";
+  static override description = "The schema (slugs are lower-case words joined by single hyphens), then what a schema can't say: every payload a manifest names is declared, a music.* payload Narai owns is declared with Narai's schema (musicPayloads), no answer or task payload carries a verdict, commands and answers need an embed that runs the SDK, <name>--<publisher> fits a DNS label, a relative embed url is one of the files, files sorted by path.";
 
   async run(): Promise<void> {
     const root = await toolRoot(process.cwd());

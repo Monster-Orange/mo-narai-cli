@@ -15,6 +15,8 @@ learner: a tool never grades and never learns who the learner is.
 - With `assist: honors`, a task whose `assist` is `none` gets no hints and no self-checks from the tool.
 - Show the task's `prompt` as Narai sends it; it is already in the learner's language. Say `ready` in the locale the
   tool actually renders.
+- The microphone is the step's to grant, launch by launch: declare `capabilities.microphone: true`, and show its
+  control only when `tool.start.granted` has `"microphone"`. `narai dev --grant microphone` simulates the grant.
 - Only the SDK talks to Narai (`connect`, `ready`, `answer`, `practice`, `onCommand`, `close`). No other `postMessage`,
   no network unless `capabilities.network` says so.
 

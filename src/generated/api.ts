@@ -206,6 +206,34 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/tools/launches/{launch}/storage/{key}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Storage Get
+         * @description A key the tool kept in this launch.
+         */
+        get: operations["storage_get_api_tools_launches__launch__storage__key__get"];
+        /**
+         * Storage Put
+         * @description Keep a key in this launch, or rewrite it.
+         */
+        put: operations["storage_put_api_tools_launches__launch__storage__key__put"];
+        post?: never;
+        /**
+         * Storage Delete
+         * @description Remove a key from this launch (done whether or not it was there).
+         */
+        delete: operations["storage_delete_api_tools_launches__launch__storage__key__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -281,6 +309,11 @@ export interface components {
         CiTokensOut: {
             /** Tokens */
             tokens: components["schemas"]["CiTokenOut"][];
+        };
+        /** HTTPValidationError */
+        HTTPValidationError: {
+            /** Detail */
+            detail?: components["schemas"]["ValidationError"][];
         };
         /** LaunchIn */
         LaunchIn: {
@@ -396,6 +429,19 @@ export interface components {
             /** Scopes */
             scopes: components["schemas"]["Scope"][];
         };
+        /** StorageIn */
+        StorageIn: {
+            /**
+             * Value
+             * @description Any JSON, at most 16384 bytes of it compact
+             */
+            value: unknown;
+        };
+        /** StorageOut */
+        StorageOut: {
+            /** Value */
+            value: unknown;
+        };
         /** ToolIn */
         ToolIn: {
             /** Name */
@@ -426,6 +472,19 @@ export interface components {
             publisher: string;
             /** Tools */
             tools: components["schemas"]["ToolOut"][];
+        };
+        /** ValidationError */
+        ValidationError: {
+            /** Location */
+            loc: (string | number)[];
+            /** Message */
+            msg: string;
+            /** Error Type */
+            type: string;
+            /** Input */
+            input?: unknown;
+            /** Context */
+            ctx?: Record<string, never>;
         };
         /** VersionDetail */
         VersionDetail: {
@@ -1493,6 +1552,102 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Refusal"];
+                };
+            };
+        };
+    };
+    storage_get_api_tools_launches__launch__storage__key__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                launch: string;
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StorageOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    storage_put_api_tools_launches__launch__storage__key__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                launch: string;
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StorageIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    storage_delete_api_tools_launches__launch__storage__key__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                launch: string;
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
