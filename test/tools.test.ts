@@ -107,6 +107,18 @@ describe("narai tools push", () => {
     expect(errorOf(r.stderr)).toMatchObject({ code: "version_exists", message: expect.stringContaining("raise the version") });
   });
 
+  it("stops, changing nothing, on a Narai that doesn't serve a route it needs yet", async () => {
+    const root = built();
+    await as(root, ["tools", "register", "--yes"]);
+    reg.missing = (method, parts) => method === "GET" && parts[2] === "versions" && parts.length === 4;
+    const before = reg.calls.length;
+    const r = await as(root, ["tools", "push", "--yes"]);
+    expect(r.status).toBe(1);
+    expect(errorOf(r.stderr)).toMatchObject({ code: "not_served", message: expect.stringContaining("a newer Narai") });
+    expect(reg.calls.slice(before).filter((c) => !c.startsWith("GET"))).toEqual([]);
+    expect(reg.tools.get("narai-dev/echo")?.versions.size).toBe(0);
+  });
+
   it("needs the tool registered first", async () => {
     const r = await as(built(), ["tools", "push", "--plan"]);
     expect(r.status).toBe(1);

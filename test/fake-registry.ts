@@ -11,12 +11,14 @@ export interface FakeRegistry {
   tools: Map<string, { id: string; name: string; versions: Map<string, { bundle_digest: string; files: Map<string, Buffer> }> }>;
   calls: string[];
   off: boolean;
+  /** A route this Narai doesn't serve yet: its web framework answers 404 `{"detail": "Not Found"}`, no refusal. */
+  missing: ((method: string, parts: string[]) => boolean) | null;
   close(): Promise<void>;
 }
 
 export async function fakeRegistry(): Promise<FakeRegistry> {
   const state: FakeRegistry = {
-    url: "", token: "test-token", calls: [], off: false, tools: new Map(),
+    url: "", token: "test-token", calls: [], off: false, missing: null, tools: new Map(),
     orgs: [{ org_id: "org-1", org_name: "Narai Dev", slug: null, name: null, url: null }, { org_id: "org-2", org_name: "Other", slug: "other", name: "Other", url: "https://other.example" }],
     close: async () => undefined,
   };
@@ -25,6 +27,7 @@ export async function fakeRegistry(): Promise<FakeRegistry> {
     if (headers["authorization"] !== `Bearer ${state.token}`) return refuse(401, "not_signed_in", "sign in");
     if (state.off) return refuse(404, "not_found", "not found");
     const parts = path.replace(/^\/api\/tools\/?/, "").split("/").filter(Boolean).map(decodeURIComponent);
+    if (state.missing?.(method, parts)) return { status: 404, body: { detail: "Not Found" } };
     if (method === "GET" && parts[0] === "publishers" && parts.length === 1) return { status: 200, body: { publishers: state.orgs } };
     if (method === "PUT" && parts[0] === "publishers" && parts.length === 2) {
       const org = state.orgs.find((o) => o.org_id === parts[1]);
