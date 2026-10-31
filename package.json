@@ -13,7 +13,7 @@
   },
   "type": "module",
   "bin": {
-    "narai": "./bin/run.js"
+    "narai": "bin/run.js"
   },
   "files": [
     "bin",
