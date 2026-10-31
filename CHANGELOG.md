@@ -14,4 +14,7 @@ The first release.
 - `narai build`: a release sealed with every file's sha256 and the bundle digest.
 - `narai dev`: the tool in the local harness, mounted as a lesson mounts it.
 - `narai login` and `narai logout`: sign-in in the browser, the session in the OS keychain.
+- `narai tools register`, `push` and `list`: the registry, planned and then applied (`--plan`, `--detailed-exitcode`,
+  `NARAI_TOKEN` and `--yes` in CI). A route the Narai you reach doesn't serve yet stops the command, changing nothing
+  (`not_served`).
 - Narai's address defaults to `https://beta.michinar.ai` (`--narai-url` or `NARAI_URL` for another).
