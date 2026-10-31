@@ -1,14 +1,15 @@
 // {{name}}: a Narai tool. It shows the learner something to do and reports what they did; Narai judges.
-import { connect } from "@michinarai/sdk";
+import { connect, pickLocale } from "@michinarai/sdk";
 
 const $ = (id) => document.getElementById(id);
 const manifest = await (await fetch("./narai.tool.json")).json();
-// Narai's own address. A tool served from this machine (narai dev) also takes a host on this machine.
-const tool = await connect(manifest, { hostOrigins: ["https://michinar.ai"] });
+// Only Narai's host may connect (NARAI_HOST_ORIGINS); a tool served from this machine (narai dev) also takes a local one.
+const tool = await connect(manifest);
 
 // Narai writes the prompt, in the learner's language; the tool shows it, never writes one.
 $("prompt").textContent = tool.task?.prompt ?? "";
-tool.ready(tool.start.locale);
+// the first of the learner's locales this tool has (manifest.locales), else its first
+tool.ready(pickLocale(tool.start, manifest.locales));
 
 $("say").onclick = () => {
   if (!tool.task) return;

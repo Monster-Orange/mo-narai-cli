@@ -6,8 +6,8 @@ import { Output } from "./lib/output.js";
 export type FlagsOf<T extends typeof Command> = Interfaces.InferredFlags<(typeof NaraiCommand)["baseFlags"] & T["flags"]>;
 export type ArgsOf<T extends typeof Command> = Interfaces.InferredArgs<T["args"]>;
 
-/** Narai's own address. */
-export const NARAI_URL = "https://michinar.ai";
+/** Narai's own address: the beta, where Narai runs today (the developer beta included). */
+export const NARAI_URL = "https://beta.michinar.ai";
 
 /** Every command: the global flags, one output (results to stdout, progress to stderr), and every failure mapped to
  *  the exit codes: 0 ok, 1 error, 2 usage, 3 auth. */

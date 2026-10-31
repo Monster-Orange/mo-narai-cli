@@ -16,10 +16,11 @@ async function walk(dir: string): Promise<string[]> {
   return entries.filter((e) => e.isFile()).map((e) => join(e.parentPath, e.name));
 }
 
-/** The SDK the template depends on: the one this CLI is built with. */
+/** The SDK the template depends on: the version this CLI is built with (it pins one), or a later compatible one. */
 async function sdkSpec(): Promise<string> {
   const pkg = JSON.parse(await readFile(fileURLToPath(new URL("../../package.json", import.meta.url)), "utf8")) as { dependencies: Record<string, string> };
-  return pkg.dependencies["@michinarai/sdk"] ?? "^1";
+  const own = pkg.dependencies["@michinarai/sdk"] ?? "^1";
+  return /^\d+\.\d+\.\d+$/.test(own) ? `^${own}` : own;
 }
 
 export default class Init extends NaraiCommand<typeof Init> {
