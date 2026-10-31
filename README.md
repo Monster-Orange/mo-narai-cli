@@ -86,6 +86,15 @@ narai tools push
 narai tools list --publisher you
 ```
 
+**`narai tools tokens create`**, **`list`** and **`revoke`** manage a tool's CI tokens: what `NARAI_TOKEN` holds in
+CI. A token reads and uploads this tool's versions, in this environment only. `create` prints the token once.
+
+```sh
+narai tools tokens create --label github-actions --days 90
+narai tools tokens list
+narai tools tokens revoke <id>
+```
+
 Today a tool is self-hosted: `surfaces.embed.url` is its own `https://` address. Bundles hosted by Narai (a relative
 `embed.url`, such as `index.html`) need a newer Narai. A command that reaches a Narai without the route it needs says
 so and stops; it changes nothing.

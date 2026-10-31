@@ -17,4 +17,5 @@ The first release.
 - `narai tools register`, `push` and `list`: the registry, planned and then applied (`--plan`, `--detailed-exitcode`,
   `NARAI_TOKEN` and `--yes` in CI). A route the Narai you reach doesn't serve yet stops the command, changing nothing
   (`not_served`).
+- `narai tools tokens create`, `list` and `revoke`: a tool's CI tokens, for `NARAI_TOKEN`.
 - Narai's address defaults to `https://beta.michinar.ai` (`--narai-url` or `NARAI_URL` for another).

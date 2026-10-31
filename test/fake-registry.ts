@@ -10,6 +10,7 @@ export interface FakeRegistry {
   orgs: { org_id: string; org_name: string; slug: string | null; name: string | null; url: string | null }[];
   tools: Map<string, { id: string; name: string; versions: Map<string, { bundle_digest: string; files: Map<string, Buffer> }> }>;
   calls: string[];
+  ciTokens: { id: string; label: string | null; env: string; scopes: string[]; expires_at: string; revoked_at: string | null; token: string }[];
   off: boolean;
   /** A route this Narai doesn't serve yet: its web framework answers 404 `{"detail": "Not Found"}`, no refusal. */
   missing: ((method: string, parts: string[]) => boolean) | null;
@@ -18,7 +19,7 @@ export interface FakeRegistry {
 
 export async function fakeRegistry(): Promise<FakeRegistry> {
   const state: FakeRegistry = {
-    url: "", token: "test-token", calls: [], off: false, missing: null, tools: new Map(),
+    url: "", token: "test-token", calls: [], ciTokens: [], off: false, missing: null, tools: new Map(),
     orgs: [{ org_id: "org-1", org_name: "Narai Dev", slug: null, name: null, url: null }, { org_id: "org-2", org_name: "Other", slug: "other", name: "Other", url: "https://other.example" }],
     close: async () => undefined,
   };
@@ -50,6 +51,23 @@ export async function fakeRegistry(): Promise<FakeRegistry> {
     const tool = state.tools.get(`${publisher}/${name}`);
     if (!tool) return refuse(404, "not_found", "no such tool");
     if (parts.length === 2 && method === "GET") return { status: 200, body: out(tool) };
+    if (versions === "ci-tokens") {
+      const visible = (t: FakeRegistry["ciTokens"][number]) => { const { token: _t, ...rest } = t; void _t; return rest; };
+      if (method === "GET" && !version) return { status: 200, body: { tokens: state.ciTokens.map(visible) } };
+      if (method === "POST" && !version) {
+        const asked = JSON.parse(body.toString()) as { days: number; label?: string; scopes?: string[] };
+        if (![7, 30, 90, 365].includes(asked.days)) return refuse(422, "validation_failed", "days", ["days: 7, 30, 90 or 365"]);
+        const made = { id: `cit_${state.ciTokens.length + 1}`, label: asked.label ?? null, env: "local", scopes: asked.scopes ?? ["tool:versions.read", "tool:versions.upload"], expires_at: "2027-01-25T00:00:00Z", revoked_at: null, token: `ntc_secret${state.ciTokens.length + 1}` };
+        state.ciTokens.push(made);
+        return { status: 201, body: made };
+      }
+      if (method === "DELETE" && version) {
+        const t = state.ciTokens.find((x) => x.id === version);
+        if (!t) return refuse(404, "not_found", "no such token");
+        t.revoked_at = "2026-10-27T00:00:00Z";
+        return { status: 204, body: null };
+      }
+    }
     if (versions === "versions" && version && method === "GET") {
       const v = tool.versions.get(version);
       return v ? { status: 200, body: { id: version, version, status: "draft", bundle_digest: v.bundle_digest, manifest: {} } } : refuse(404, "not_found", "no such version");
@@ -79,7 +97,8 @@ export async function fakeRegistry(): Promise<FakeRegistry> {
       const path = new URL(req.url ?? "/", "http://x").pathname;
       state.calls.push(`${req.method} ${path}`);
       void route(req.method ?? "GET", path, Buffer.concat(chunks), req.headers as Record<string, string>).then(({ status, body }) => {
-        res.writeHead(status, { "content-type": "application/json" }).end(JSON.stringify(body));
+        if (status === 204) res.writeHead(204).end();
+        else res.writeHead(status, { "content-type": "application/json" }).end(JSON.stringify(body));
       });
     });
   });
