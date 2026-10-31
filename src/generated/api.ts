@@ -30,7 +30,7 @@ export interface paths {
         };
         /**
          * Publishers
-         * @description The organisations the caller may develop tools for, with their publisher when they have one.
+         * @description The organisations the caller may develop tools for, with their publisher when they have one (a token: its one).
          */
         get: operations["publishers_api_tools_publishers_get"];
         put?: never;
@@ -127,6 +127,44 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/tools/{publisher}/{name}/ci-tokens": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Ci Tokens */
+        get: operations["list_ci_tokens_api_tools__publisher___name__ci_tokens_get"];
+        put?: never;
+        /**
+         * Mint Ci Token
+         * @description A CI token for this tool in this environment (`tool:` scopes): the token is in this answer and nowhere else.
+         */
+        post: operations["mint_ci_token_api_tools__publisher___name__ci_tokens_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/tools/{publisher}/{name}/ci-tokens/{token_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Revoke Ci Token */
+        delete: operations["revoke_ci_token_api_tools__publisher___name__ci_tokens__token_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/tools/{publisher}/{name}/versions/{version}/launches": {
         parameters: {
             query?: never;
@@ -172,6 +210,78 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** CiTokenIn */
+        CiTokenIn: {
+            /** Label */
+            label?: string | null;
+            /**
+             * Days
+             * @default 90
+             */
+            days: number;
+            /** Scopes */
+            scopes?: string[];
+        };
+        /** CiTokenMade */
+        CiTokenMade: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Label */
+            label: string | null;
+            /** Env */
+            env: string;
+            /** Scopes */
+            scopes: string[];
+            /** Created At */
+            created_at?: string | null;
+            /**
+             * Expires At
+             * Format: date-time
+             */
+            expires_at: string;
+            /** Last Used At */
+            last_used_at?: string | null;
+            /** Revoked At */
+            revoked_at?: string | null;
+            /**
+             * Token
+             * @description shown once: only its SHA-256 is kept
+             */
+            token: string;
+        };
+        /** CiTokenOut */
+        CiTokenOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Label */
+            label: string | null;
+            /** Env */
+            env: string;
+            /** Scopes */
+            scopes: string[];
+            /** Created At */
+            created_at?: string | null;
+            /**
+             * Expires At
+             * Format: date-time
+             */
+            expires_at: string;
+            /** Last Used At */
+            last_used_at?: string | null;
+            /** Revoked At */
+            revoked_at?: string | null;
+        };
+        /** CiTokensOut */
+        CiTokensOut: {
+            /** Tokens */
+            tokens: components["schemas"]["CiTokenOut"][];
+        };
         /** LaunchIn */
         LaunchIn: {
             /** Preset */
@@ -260,7 +370,7 @@ export interface components {
         };
         /**
          * Refusal
-         * @description A 4xx (§5.1): `error` is the code, `message` its sentence; an upload's refusal lists its `reasons`.
+         * @description A 4xx: `error` is the code, `message` its sentence; an upload's refusal lists its `reasons`.
          */
         Refusal: {
             /** Error */
@@ -936,6 +1046,240 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["VersionDetail"];
                 };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Refusal"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Refusal"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Refusal"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Refusal"];
+                };
+            };
+            /** @description Request Entity Too Large */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Refusal"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Refusal"];
+                };
+            };
+        };
+    };
+    list_ci_tokens_api_tools__publisher___name__ci_tokens_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                publisher: string;
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CiTokensOut"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Refusal"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Refusal"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Refusal"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Refusal"];
+                };
+            };
+            /** @description Request Entity Too Large */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Refusal"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Refusal"];
+                };
+            };
+        };
+    };
+    mint_ci_token_api_tools__publisher___name__ci_tokens_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                publisher: string;
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CiTokenIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CiTokenMade"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Refusal"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Refusal"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Refusal"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Refusal"];
+                };
+            };
+            /** @description Request Entity Too Large */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Refusal"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Refusal"];
+                };
+            };
+        };
+    };
+    revoke_ci_token_api_tools__publisher___name__ci_tokens__token_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                publisher: string;
+                name: string;
+                token_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Unauthorized */
             401: {
