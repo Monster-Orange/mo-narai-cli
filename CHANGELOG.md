@@ -3,6 +3,11 @@
 0.x: the contract (the manifest, the wire, the registry's API) can still change between minor versions; this file says
 how. A version's entry lists what you have to change, first.
 
+## 0.1.1
+
+Nothing to change. The first release published from `main` by the release workflow, over npm's trusted publishing,
+with provenance: from here on, merging a version bump is the release.
+
 ## 0.1.0
 
 The first release.
