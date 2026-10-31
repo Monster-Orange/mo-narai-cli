@@ -142,4 +142,53 @@ describe("narai dev", () => {
       await stop();
     }
   });
+
+  it("grants the microphone with --grant microphone, as a step would, only when the manifest declares it", async () => {
+    const root = tool();
+    const grantedOf = async (host: string) =>
+      ((await (await fetch(new URL("/harness.json", host))).json()) as { granted: string[] }).granted;
+    // the template declares no microphone: Narai drops the grant, and so does the harness
+    const plain = await naraiServe(["dev", "--json", "--grant", "microphone"], root);
+    try {
+      expect(plain.result["granted"]).toEqual([]);
+      expect(await grantedOf(plain.result["host"] ?? "")).toEqual([]);
+    } finally {
+      await plain.stop();
+    }
+    const path = join(root, "narai.tool.json");
+    const manifest = JSON.parse(readFileSync(path, "utf8")) as { capabilities: Record<string, unknown> };
+    manifest.capabilities["microphone"] = true;
+    writeFileSync(path, JSON.stringify(manifest));
+    const declared = await naraiServe(["dev", "--json", "--grant", "microphone"], root);
+    try {
+      expect(declared.result["granted"]).toEqual(["microphone"]);
+      expect(await grantedOf(declared.result["host"] ?? "")).toEqual(["microphone"]);
+    } finally {
+      await declared.stop();
+    }
+    // and without the flag, nothing is granted
+    const none = await naraiServe(["dev", "--json"], root);
+    try {
+      expect(none.result["granted"]).toEqual([]);
+    } finally {
+      await none.stop();
+    }
+  });
+
+  it("refuses a grant it doesn't know", () => {
+    const r = narai(["dev", "--json", "--grant", "camera"], tool());
+    expect(r.status).toBe(2);
+    expect(errorOf(r.stderr)).toMatchObject({ code: "usage", message: expect.stringContaining("microphone") });
+  });
+});
+
+describe("the template's microphone", () => {
+  it("shows its microphone control only when the start grants the microphone", () => {
+    const dir = scratch();
+    expect(narai(["init", "echo", "--publisher", "narai-dev", "--dir", "echo"], dir).status).toBe(0);
+    const html = readFileSync(join(dir, "echo", "src", "index.html"), "utf8");
+    expect(html).toMatch(/<button id="mic"[^>]*\shidden[\s>]/);
+    const js = readFileSync(join(dir, "echo", "src", "tool.js"), "utf8");
+    expect(js).toContain(`tool.start.granted?.includes("microphone")`);
+  });
 });

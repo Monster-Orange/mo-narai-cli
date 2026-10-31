@@ -3,6 +3,18 @@
 0.x: the contract (the manifest, the wire, the registry's API) can still change between minor versions; this file says
 how. A version's entry lists what you have to change, first.
 
+## 0.2.0
+
+Nothing to change in a tool made by `narai init`. It runs on `@michinarai/sdk` 0.3.0 now, so its rules apply to
+`narai validate`, among them: a slug is lower-case words joined by single hyphens, and a `music.*` payload Narai owns is
+declared with `musicPayloads(...)` (the SDK's CHANGELOG has the list).
+
+- `narai dev --grant microphone`: the harness starts the tool as a step that grants the microphone would
+  (`tool.start.granted`), and frames it with the microphone allowed. As on Narai, only what the manifest's
+  `capabilities` declare is granted; the rest is dropped, with a note. `--json` says what was granted.
+- `narai init`'s template has a Listen button for the microphone, shown only when the start grants it.
+- `narai validate` describes the rules it runs.
+
 ## 0.1.1
 
 Nothing to change. The first release published from `main` by the release workflow, over npm's trusted publishing,

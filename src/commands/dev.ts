@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { Flags } from "@oclif/core";
+import type { Grant } from "@michinarai/sdk/host";
 import { startHarness, type HarnessOptions } from "@michinarai/sdk/harness";
 import { NaraiCommand } from "../base-command.js";
 import { NaraiError } from "../lib/errors.js";
@@ -25,6 +26,10 @@ export default class Dev extends NaraiCommand<typeof Dev> {
     locale: Flags.string({ description: "The locale the tool starts in (default: its first)." }),
     task: Flags.string({ description: "A JSON file: the task Narai would start it on ({id, kind, assist, prompt})." }),
     preset: Flags.string({ description: "A JSON file: the step's preset payload ({schema, ...})." }),
+    grant: Flags.string({
+      description: "What the step grants the tool, as Narai's start does: only what the manifest's capabilities declare.",
+      options: ["microphone"], multiple: true,
+    }),
   };
 
   async run(): Promise<void> {
@@ -38,8 +43,13 @@ export default class Dev extends NaraiCommand<typeof Dev> {
     const preset = await json(this.flags.preset, "preset");
     if (task) options.task = task as NonNullable<HarnessOptions["task"]>;
     if (preset) options.preset = preset as NonNullable<HarnessOptions["preset"]>;
+    // Narai grants only what the manifest declares and drops the rest: so does this, saying so
+    const asked = (this.flags.grant ?? []) as Grant[];
+    const granted = asked.filter((g) => manifest.capabilities?.[g] === true);
+    for (const g of asked) if (!granted.includes(g)) this.out.progress(`not granted: ${g} (the manifest's capabilities.${g} isn't true)`);
+    options.granted = granted;
     const harness = await startHarness(options);
-    this.out.result({ host: harness.hostUrl, tool: harness.toolUrl }, () => [`host  ${harness.hostUrl}`, `tool  ${harness.toolUrl}`]);
+    this.out.result({ host: harness.hostUrl, tool: harness.toolUrl, granted }, () => [`host  ${harness.hostUrl}`, `tool  ${harness.toolUrl}`, ...(granted.length ? [`granted  ${granted.join(", ")}`] : [])]);
     this.out.progress("Ctrl-C to stop");
     await new Promise<void>((done) => {
       const stop = () => { void harness.close().then(done); };
