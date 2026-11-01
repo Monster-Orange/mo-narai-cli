@@ -10,6 +10,8 @@ Nothing to change. A tool made by an earlier `narai init` can add `name` itself.
 - The SDK is 0.3.2. `narai dev` and `narai validate` take a manifest's `name` by language, and the harness forwards an
   Escape the tool leaves alone (`tool.key`), so it shows in what the harness logs. Its storage reads a key never kept as
   `not_found`.
+- The README's "Getting access": the account, the developer beta, the email, `narai login`, register and push, CI's
+  token, and what you see when you sign in before the grant.
 - `narai init` writes `name: { "en": "<the tool's name, its words capitalized>" }` into the manifest, the name Narai
   shows the learner, and the template's AGENTS.md says how to add a language.
 
