@@ -13,7 +13,7 @@ export interface FakeNarai {
   close(): Promise<void>;
 }
 
-export async function fakeNarai(o: { issuerOverride?: string; deny?: boolean } = {}): Promise<FakeNarai> {
+export async function fakeNarai(o: { issuerOverride?: string; deny?: boolean; denyDescription?: string } = {}): Promise<FakeNarai> {
   const codes = new Map<string, { challenge: string; redirect: string }>();
   const state: FakeNarai = { url: "", refreshes: 0, live: new Set(), revoked: [], close: async () => undefined };
   const tokens = () => {
@@ -41,7 +41,10 @@ export async function fakeNarai(o: { issuerOverride?: string; deny?: boolean } =
       }
       back.searchParams.set("state", q.get("state") ?? "");
       back.searchParams.set("iss", state.url);
-      if (o.deny) back.searchParams.set("error", "access_denied");
+      if (o.deny) {
+        back.searchParams.set("error", "access_denied");
+        if (o.denyDescription) back.searchParams.set("error_description", o.denyDescription);
+      }
       else {
         const code = randomBytes(8).toString("hex");
         codes.set(code, { challenge: q.get("code_challenge") ?? "", redirect });

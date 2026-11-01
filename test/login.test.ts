@@ -65,6 +65,8 @@ describe("narai login", () => {
     expect(r.code).toBe(0);
     expect(JSON.parse(r.stdout)).toMatchObject({ signed_in: new URL(narai.url).host, scopes: expect.arrayContaining(["dev:tools.write"]) });
     expect(r.stderr).toContain("Sign in to Narai: ");
+    // a sign-in can wait minutes on the browser: say so, and how to stop
+    expect(r.stderr).toContain("Waiting for you to approve it in the browser (Ctrl-C to stop)");
     expect([...store.entries.values()]).toEqual([...narai.live]);
   });
 
@@ -75,6 +77,15 @@ describe("narai login", () => {
     expect(r.code).toBe(3);
     expect(r.stderr).toContain("oauth_access_denied");
     expect(store.entries.size).toBe(0);
+  });
+
+  it("says why Narai refused, when it says", async () => {
+    await narai.close();
+    const why = "You don't develop tools yet: ask for the developer beta at /developers.";
+    narai = await fakeNarai({ deny: true, denyDescription: why });
+    const r = await run(Login, ["--json", "--narai-url", narai.url]);
+    expect(r.code).toBe(3);
+    expect(r.stderr).toContain(why);
   });
 
   it("won't sign in where the server names another issuer", async () => {

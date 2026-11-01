@@ -24,6 +24,7 @@ export default class Login extends NaraiCommand<typeof Login> {
       const url = authorizationUrl(meta, { naraiUrl, redirectUri: loopback.redirectUri, challenge, state });
       this.out.prompt(`Sign in to Narai: ${url}`);
       if (!this.flags["no-browser"]) deps.openBrowser(url);
+      this.out.prompt("Waiting for you to approve it in the browser (Ctrl-C to stop)");
       const code = await loopback.code;
       const tokens = await exchangeCode(meta, { naraiUrl, code, verifier, redirectUri: loopback.redirectUri });
       const host = new URL(naraiUrl).host;
