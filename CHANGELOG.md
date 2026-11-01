@@ -7,8 +7,11 @@ how. A version's entry lists what you have to change, first.
 
 Nothing to change. A tool made by an earlier `narai init` can add the rule to its own AGENTS.md.
 
-- The SDK is 0.3.3: `narai validate` takes a manifest's `surfaces.account_link`, and refuses one whose three URLs
+- The SDK is 0.3.4: `narai validate` takes a manifest's `surfaces.account_link`, and refuses one whose three URLs
   aren't on one origin.
+- `narai dev --subject <id>`, for testing only: the tool starts as for a learner who linked their account with your
+  publisher and chose to let its tools know them (`tool.start.subject`). The id is 43 URL-safe characters, and only a
+  manifest that declares `surfaces.account_link` gets it, as in a lesson. The harness's log shows the start it sent.
 - The template's AGENTS.md says what a tool may know of the learner: nothing, unless the learner linked their account
   with the tool's publisher and chose to let its tools know them; then `tool.start.subject`, never shown.
 

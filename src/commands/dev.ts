@@ -8,6 +8,9 @@ import { deps } from "../lib/deps.js";
 import { NaraiError } from "../lib/errors.js";
 import { checkedManifest, toolRoot } from "../lib/project.js";
 
+/** A learner's id with a publisher, as narai.tool.start carries it. */
+const SUBJECT = /^[A-Za-z0-9_-]{43}$/;
+
 async function json(path: string | undefined, what: string): Promise<unknown> {
   if (!path) return undefined;
   try {
@@ -40,6 +43,9 @@ export default class Dev extends NaraiCommand<typeof Dev> {
       description: "What the step grants the tool, as Narai's start does: only what the manifest's capabilities declare.",
       options: ["microphone"], multiple: true,
     }),
+    subject: Flags.string({
+      description: "For testing only: start the tool as for a learner who linked their account with your publisher and chose to let its tools know them (tool.start.subject, 43 URL-safe characters). Only a manifest that declares surfaces.account_link gets it, as in a lesson.",
+    }),
     "no-open": Flags.boolean({ description: "Print the host's address; don't open it." }),
   };
 
@@ -61,12 +67,22 @@ export default class Dev extends NaraiCommand<typeof Dev> {
     const granted = asked.filter((g) => manifest.capabilities?.[g] === true);
     for (const g of asked) if (!granted.includes(g)) this.out.progress(`not granted: ${g} (the manifest's capabilities.${g} isn't true)`);
     options.granted = granted;
+    const askedSubject = this.flags.subject;
+    if (askedSubject !== undefined && !SUBJECT.test(askedSubject)) {
+      throw new NaraiError("--subject: 43 URL-safe characters (A-Z, a-z, 0-9, _ and -), as Narai's subjects are", "bad_subject", 2);
+    }
+    // as in a lesson: only a manifest that declares account linking gets it (the harness's host drops it too)
+    const linked = Boolean(manifest.surfaces.account_link);
+    const subject = askedSubject !== undefined && linked ? askedSubject : null;
+    if (askedSubject !== undefined && !linked) this.out.progress("no subject: the manifest declares no surfaces.account_link");
+    if (subject) options.subject = subject;
     const harness = await startHarness(options);
     const kind = options.task?.kind ?? null;
-    this.out.result({ host: harness.hostUrl, tool: harness.toolUrl, task: kind, granted }, () => [
+    this.out.result({ host: harness.hostUrl, tool: harness.toolUrl, task: kind, granted, subject }, () => [
       `Open ${harness.hostUrl} in a browser: your tool, mounted as a lesson mounts it, and what it sends Narai.`,
       `task  ${kind ?? "none (the manifest answers nothing)"}${task ? "" : kind ? " (a sample; --task <file> starts another)" : ""}`,
       ...(granted.length ? [`granted  ${granted.join(", ")}`] : []),
+      ...(subject ? [`subject  ${subject} (a linked learner, for testing)`] : []),
       "This runs on this machine only. To use the tool in a Narai lesson: narai login, narai tools register, narai tools push.",
     ]);
     if (!this.out.json && !this.flags["no-open"]) deps.openBrowser(harness.hostUrl);

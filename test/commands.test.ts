@@ -209,6 +209,46 @@ describe("narai dev", () => {
     }
   });
 
+  // A learner who linked their account with the publisher and chose to let its tools know them, simulated: as in a
+  // lesson, only a manifest that declares surfaces.account_link gets the subject
+  it("starts the tool for a linked learner with --subject, only when the manifest declares account linking", async () => {
+    const root = tool();
+    const subject = "a".repeat(40) + "_-Z";
+    const configOf = async (host: string) => (await (await fetch(new URL("/harness.json", host))).json()) as { subject?: string };
+    const plain = await naraiServe(["dev", "--json", "--subject", subject], root);
+    try {
+      expect(plain.result["subject"]).toBeNull();
+    } finally {
+      await plain.stop();
+    }
+    const path = join(root, "narai.tool.json");
+    const manifest = JSON.parse(readFileSync(path, "utf8")) as { surfaces: Record<string, unknown> };
+    manifest.surfaces["account_link"] = { url: "https://music.example/connect", client_id: "https://music.example/client.json", webhook: "https://music.example/unlinked" };
+    writeFileSync(path, JSON.stringify(manifest));
+    const linked = await naraiServe(["dev", "--json", "--subject", subject], root);
+    try {
+      expect(linked.result["subject"]).toBe(subject);
+      expect((await configOf(linked.result["host"] ?? "")).subject).toBe(subject);
+    } finally {
+      await linked.stop();
+    }
+    const none = await naraiServe(["dev", "--json"], root);
+    try {
+      expect(none.result["subject"]).toBeNull();
+      expect((await configOf(none.result["host"] ?? "")).subject).toBeUndefined();
+    } finally {
+      await none.stop();
+    }
+  });
+
+  it("refuses a subject that isn't 43 URL-safe characters (usage)", () => {
+    for (const bad of ["a".repeat(42), "a".repeat(44), "a".repeat(42) + "=", "someone@example.com"]) {
+      const r = narai(["dev", "--json", "--subject", bad], tool());
+      expect(r.status, bad).toBe(2);
+      expect(errorOf(r.stderr)).toMatchObject({ code: "bad_subject" });
+    }
+  });
+
   it("refuses a grant it doesn't know", () => {
     const r = narai(["dev", "--json", "--grant", "camera"], tool());
     expect(r.status).toBe(2);
