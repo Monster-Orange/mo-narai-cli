@@ -46,6 +46,10 @@ Signed in before your grant? The browser says so; close it, and `narai login` st
 yet: ask for the developer beta at https://beta.michinar.ai/developers." Another Narai (your own, or a test one) takes
 `--narai-url <address>` on every command, or `NARAI_URL`.
 
+A publisher with accounts of its own can let learners link them with Narai, offer Sign in with Narai, and tell its
+tools who the learner is when the learner allows it: the SDK's
+[Account linking](https://github.com/Monster-Orange/mo-narai-sdk/blob/main/docs/account-linking.md) guide.
+
 ## Commands
 
 Every command takes `--json`, `--yes` and `--no-input`. Results go to stdout, progress to stderr. Exit codes: 0 ok,
