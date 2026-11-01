@@ -53,6 +53,9 @@ describe("narai init", () => {
     expect(JSON.parse(readFileSync(join(dir, "fretboard", "package.json"), "utf8")).dependencies["@michinarai/sdk"]).toBe(`^${own}`);
     expect(readFileSync(join(dir, "fretboard", "src", "tool.js"), "utf8")).toContain("pickLocale(tool.start, manifest.locales)");
     expect(readFileSync(join(dir, "fretboard", "src", "tool.js"), "utf8")).not.toContain("{{");
+    // the coding agent's rules say what a tool may know of the learner: nothing, unless the learner chose it
+    expect(readFileSync(join(dir, "fretboard", "AGENTS.md"), "utf8").replace(/\s+/g, " ")).toContain(
+      "a tool never learns who the learner is, unless the learner linked their account with the tool's publisher and chose to let its tools know them");
   });
 
   it("won't write into a directory that isn't empty", () => {

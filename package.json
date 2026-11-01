@@ -1,6 +1,6 @@
 {
   "name": "@michinarai/cli",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "The narai command: scaffold, validate, build, run and register tools for Narai lessons.",
   "license": "Apache-2.0",
   "repository": {
@@ -43,7 +43,7 @@
   },
   "dependencies": {
     "@inquirer/confirm": "6.3.3",
-    "@michinarai/sdk": "0.3.2",
+    "@michinarai/sdk": "0.3.3",
     "@napi-rs/keyring": "2.1.1",
     "@oclif/core": "5.1.7",
     "openapi-fetch": "0.17.0"

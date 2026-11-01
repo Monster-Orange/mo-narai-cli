@@ -3,6 +3,15 @@
 0.x: the contract (the manifest, the wire, the registry's API) can still change between minor versions; this file says
 how. A version's entry lists what you have to change, first.
 
+## 0.2.4
+
+Nothing to change. A tool made by an earlier `narai init` can add the rule to its own AGENTS.md.
+
+- The SDK is 0.3.3: `narai validate` takes a manifest's `surfaces.account_link`, and refuses one whose three URLs
+  aren't on one origin.
+- The template's AGENTS.md says what a tool may know of the learner: nothing, unless the learner linked their account
+  with the tool's publisher and chose to let its tools know them; then `tool.start.subject`, never shown.
+
 ## 0.2.3
 
 Nothing to change. A tool made by an earlier `narai init` can add `name` itself.
