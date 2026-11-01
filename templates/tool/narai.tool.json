@@ -1,6 +1,7 @@
 {
   "id": "{{id}}",
   "version": "0.1.0",
+  "name": { "en": "{{title}}" },
   "sdk": "^1",
   "publisher": { "name": "{{publisher}}", "url": "https://example.com" },
   "surfaces": { "embed": { "url": "https://example.com/{{name}}/", "sdk": "^1" } },

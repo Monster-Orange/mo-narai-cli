@@ -41,7 +41,9 @@ export default class Init extends NaraiCommand<typeof Init> {
     const existing = await readdir(target).catch(() => [] as string[]);
     if (existing.length > 0) throw new NaraiError(`${relative(process.cwd(), target) || "."} isn't empty`, "not_empty");
     const family = name.replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").replace(/^(\d)/, "t$1");
-    const values: Record<string, string> = { id: `${publisher}/${name}`, name, publisher, family, sdk: await sdkSpec() };
+    // the name Narai shows the learner (by language; English to start): the slug's words, capitalized
+    const title = name.split("-").filter(Boolean).map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
+    const values: Record<string, string> = { id: `${publisher}/${name}`, name, title, publisher, family, sdk: await sdkSpec() };
     const fill = (text: string) => text.replace(/\{\{(\w+)\}\}/g, (m, key: string) => values[key] ?? m);
     const written: string[] = [];
     for (const source of await walk(TEMPLATE)) {

@@ -29,6 +29,23 @@ The harness page is Narai's host, with your tool in a sandboxed frame on another
 It shows every message the tool sends, with the verdict Narai's host would give it, and sends the manifest's
 commands as the Tutor would. Change `src/tool.js`, run `npm run dev` again.
 
+## Getting access
+
+`narai init`, `validate`, `build` and `dev` need no account: the harness runs on your machine only. To put a tool in a
+Narai lesson:
+
+1. Make a Narai account at [beta.michinar.ai](https://beta.michinar.ai).
+2. Ask for the developer beta at [beta.michinar.ai/developers](https://beta.michinar.ai/developers): say what you'd
+   build.
+3. When it's granted, you get an email with the next steps.
+4. `narai login`: you sign in in the browser, and the session stays in your OS keychain. There's no API key to copy.
+5. `narai tools register`, then `narai tools push`, in your tool's folder.
+6. In CI: `narai tools tokens create`, and keep what it prints in the secret `NARAI_TOKEN`.
+
+Signed in before your grant? The browser says so; close it, and `narai login` stops with "You don't develop tools
+yet: ask for the developer beta at https://beta.michinar.ai/developers." Another Narai (your own, or a test one) takes
+`--narai-url <address>` on every command, or `NARAI_URL`.
+
 ## Commands
 
 Every command takes `--json`, `--yes` and `--no-input`. Results go to stdout, progress to stderr. Exit codes: 0 ok,

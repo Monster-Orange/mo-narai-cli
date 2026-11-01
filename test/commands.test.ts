@@ -42,6 +42,11 @@ describe("narai init", () => {
     const manifest = JSON.parse(readFileSync(join(dir, "fretboard", "narai.tool.json"), "utf8")) as { id: string; answers: Record<string, string> };
     expect(manifest.id).toBe("narai-dev/fretboard");
     expect(manifest.answers).toEqual({ "fretboard.say": "fretboard.answer@1" });
+    // the name Narai shows the learner, in English to start with: the tool's name, its words capitalized
+    expect((manifest as { name?: unknown }).name).toEqual({ en: "Fretboard" });
+    const two = narai(["init", "chord-wheel", "--publisher", "narai-dev", "--json"], dir);
+    expect(two.status).toBe(0);
+    expect(JSON.parse(readFileSync(join(dir, "chord-wheel", "narai.tool.json"), "utf8")).name).toEqual({ en: "Chord Wheel" });
     // the CLI pins the SDK it's built with; a new tool takes that version or a later compatible one
     const own = (JSON.parse(readFileSync("package.json", "utf8")) as { dependencies: Record<string, string> }).dependencies["@michinarai/sdk"];
     expect(own).toMatch(/^\d+\.\d+\.\d+$/);
