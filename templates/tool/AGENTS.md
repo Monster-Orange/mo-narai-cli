@@ -13,6 +13,8 @@ learner: a tool never grades and never learns who the learner is.
 - No verdict, ever: no `correct`, `score`, `passed`, `verdict`, `grade` (the list is the SDK's `VERDICT_KEYS`) in an
   answer's schema or body. Report what the learner did; Narai decides what it means.
 - With `assist: honors`, a task whose `assist` is `none` gets no hints and no self-checks from the tool.
+- `name` is what Narai shows the learner, by language (`{ "en": "Chord Wheel", "ja": "コードホイール" }`): add a
+  language when the tool renders it.
 - Show the task's `prompt` as Narai sends it; it is already in the learner's language. Say `ready` in the locale the
   tool actually renders.
 - The microphone is the step's to grant, launch by launch: declare `capabilities.microphone: true`, and show its

@@ -3,6 +3,16 @@
 0.x: the contract (the manifest, the wire, the registry's API) can still change between minor versions; this file says
 how. A version's entry lists what you have to change, first.
 
+## 0.2.3
+
+Nothing to change. A tool made by an earlier `narai init` can add `name` itself.
+
+- The SDK is 0.3.2. `narai dev` and `narai validate` take a manifest's `name` by language, and the harness forwards an
+  Escape the tool leaves alone (`tool.key`), so it shows in what the harness logs. Its storage reads a key never kept as
+  `not_found`.
+- `narai init` writes `name: { "en": "<the tool's name, its words capitalized>" }` into the manifest, the name Narai
+  shows the learner, and the template's AGENTS.md says how to add a language.
+
 ## 0.2.2
 
 Nothing to change.

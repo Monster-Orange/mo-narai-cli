@@ -215,7 +215,7 @@ export interface paths {
         };
         /**
          * Storage Get
-         * @description A key the tool kept in this launch.
+         * @description A key the tool kept in this launch; 204, no body, when it kept none.
          */
         get: operations["storage_get_api_tools_launches__launch__storage__key__get"];
         /**
@@ -1576,6 +1576,13 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["StorageOut"];
                 };
+            };
+            /** @description No such key in this launch (not an error) */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Validation Error */
             422: {
