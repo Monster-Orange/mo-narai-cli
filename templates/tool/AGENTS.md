@@ -2,7 +2,8 @@
 
 A Narai tool is a small web app that Narai mounts in a lesson, in a sandboxed frame on its own origin. It shows the
 learner an instrument and reports what the learner did. Narai keeps the answer keys, runs every judge and owns the
-learner: a tool never grades and never learns who the learner is.
+learner: a tool never grades, and a tool never learns who the learner is, unless the learner linked their account with
+the tool's publisher and chose to let its tools know them.
 
 ## The rules
 
@@ -19,6 +20,9 @@ learner: a tool never grades and never learns who the learner is.
   tool actually renders.
 - The microphone is the step's to grant, launch by launch: declare `capabilities.microphone: true`, and show its
   control only when `tool.start.granted` has `"microphone"`. `narai dev --grant microphone` simulates the grant.
+- `tool.start.subject` is there only in that case, and only when the manifest declares `surfaces.account_link`: the
+  learner's id with the publisher, never a name or an email. The tool works without it, and never shows it. Account
+  linking is the SDK's `docs/account-linking.md`.
 - Only the SDK talks to Narai (`connect`, `ready`, `answer`, `practice`, `onCommand`, `close`). No other `postMessage`,
   no network unless `capabilities.network` says so.
 

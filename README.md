@@ -84,6 +84,7 @@ node scripts/build.mjs && narai build
 narai dev --locale ja --task task.json   # task.json: the task Narai would start it on ({id, kind, assist, prompt})
 narai dev --preset preset.json --port 4000
 narai dev --grant microphone             # as a step that grants the microphone: only if capabilities.microphone is true
+narai dev --subject <43 characters>      # for testing: a linked learner's tool.start.subject, only with surfaces.account_link
 ```
 
 **`narai login`** signs in to Narai in the browser. The answer comes back to this machine only (127.0.0.1), and the

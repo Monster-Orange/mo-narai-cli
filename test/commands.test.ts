@@ -53,6 +53,9 @@ describe("narai init", () => {
     expect(JSON.parse(readFileSync(join(dir, "fretboard", "package.json"), "utf8")).dependencies["@michinarai/sdk"]).toBe(`^${own}`);
     expect(readFileSync(join(dir, "fretboard", "src", "tool.js"), "utf8")).toContain("pickLocale(tool.start, manifest.locales)");
     expect(readFileSync(join(dir, "fretboard", "src", "tool.js"), "utf8")).not.toContain("{{");
+    // the coding agent's rules say what a tool may know of the learner: nothing, unless the learner chose it
+    expect(readFileSync(join(dir, "fretboard", "AGENTS.md"), "utf8").replace(/\s+/g, " ")).toContain(
+      "a tool never learns who the learner is, unless the learner linked their account with the tool's publisher and chose to let its tools know them");
   });
 
   it("won't write into a directory that isn't empty", () => {
@@ -203,6 +206,46 @@ describe("narai dev", () => {
       expect(await taskOf(given.result["host"] ?? "")).toMatchObject({ id: "t1", prompt: "Say hello." });
     } finally {
       await given.stop();
+    }
+  });
+
+  // A learner who linked their account with the publisher and chose to let its tools know them, simulated: as in a
+  // lesson, only a manifest that declares surfaces.account_link gets the subject
+  it("starts the tool for a linked learner with --subject, only when the manifest declares account linking", async () => {
+    const root = tool();
+    const subject = "a".repeat(40) + "_-Z";
+    const configOf = async (host: string) => (await (await fetch(new URL("/harness.json", host))).json()) as { subject?: string };
+    const plain = await naraiServe(["dev", "--json", "--subject", subject], root);
+    try {
+      expect(plain.result["subject"]).toBeNull();
+    } finally {
+      await plain.stop();
+    }
+    const path = join(root, "narai.tool.json");
+    const manifest = JSON.parse(readFileSync(path, "utf8")) as { surfaces: Record<string, unknown> };
+    manifest.surfaces["account_link"] = { url: "https://music.example/connect", client_id: "https://music.example/client.json", webhook: "https://music.example/unlinked" };
+    writeFileSync(path, JSON.stringify(manifest));
+    const linked = await naraiServe(["dev", "--json", "--subject", subject], root);
+    try {
+      expect(linked.result["subject"]).toBe(subject);
+      expect((await configOf(linked.result["host"] ?? "")).subject).toBe(subject);
+    } finally {
+      await linked.stop();
+    }
+    const none = await naraiServe(["dev", "--json"], root);
+    try {
+      expect(none.result["subject"]).toBeNull();
+      expect((await configOf(none.result["host"] ?? "")).subject).toBeUndefined();
+    } finally {
+      await none.stop();
+    }
+  });
+
+  it("refuses a subject that isn't 43 URL-safe characters (usage)", () => {
+    for (const bad of ["a".repeat(42), "a".repeat(44), "a".repeat(42) + "=", "someone@example.com"]) {
+      const r = narai(["dev", "--json", "--subject", bad], tool());
+      expect(r.status, bad).toBe(2);
+      expect(errorOf(r.stderr)).toMatchObject({ code: "bad_subject" });
     }
   });
 
