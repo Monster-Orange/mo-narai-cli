@@ -11,13 +11,19 @@ $("prompt").textContent = tool.task?.prompt ?? "";
 // the first of the learner's locales this tool has (manifest.locales), else its first
 tool.ready(pickLocale(tool.start, manifest.locales));
 
+// say what happened: a button that does nothing looks broken
+const status = (text) => { $("status").textContent = text; };
+
 $("say").onclick = () => {
-  if (!tool.task) return;
+  // a launch with no task (practice) has nothing to answer
+  if (!tool.task) return status("No task to answer: in a lesson, Narai starts one. Practice still works.");
   // what the learner did, in the payload the manifest declares for this task's kind: never whether it's right
   tool.answer({ schema: manifest.answers[tool.task.kind], text: $("text").value });
+  status("Answer sent: Narai judges it.");
 };
 $("drill").onclick = () => {
   tool.practice("drill", { duration_s: 30, attempts: 1, payload: { schema: manifest.practice.drill, rounds: 1 } });
+  status("Practice sent.");
 };
 
 // The microphone is the step's to grant, launch by launch (tool.start.granted), and only when the manifest declares it

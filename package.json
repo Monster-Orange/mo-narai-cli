@@ -1,6 +1,6 @@
 {
   "name": "@michinarai/cli",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "The narai command: scaffold, validate, build, run and register tools for Narai lessons.",
   "license": "Apache-2.0",
   "repository": {
