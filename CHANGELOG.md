@@ -3,6 +3,14 @@
 0.x: the contract (the manifest, the wire, the registry's API) can still change between minor versions; this file says
 how. A version's entry lists what you have to change, first.
 
+## 0.2.2
+
+Nothing to change.
+
+- `narai login` says it's waiting for you to approve the sign-in in the browser, and that Ctrl-C stops it: it waits
+  up to `--timeout` seconds (300).
+- When Narai refuses the sign-in and says why (`error_description`), the error carries it.
+
 ## 0.2.1
 
 Nothing to change. A first `npm run dev` now shows the tool working:
