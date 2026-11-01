@@ -175,10 +175,49 @@ describe("narai dev", () => {
     }
   });
 
+  // A first run (`npm run dev`) gives no --task: the tool starts on a task of the manifest's first answer kind, as a
+  // lesson's step would, so its Answer has something to answer. --task still picks one.
+  it("starts the tool on a task of its first answer kind when no --task is given", async () => {
+    const root = tool();
+    const taskOf = async (host: string) =>
+      ((await (await fetch(new URL("/harness.json", host))).json()) as { task?: { kind: string; prompt: string } }).task;
+    const first = await naraiServe(["dev", "--json"], root);
+    try {
+      expect(first.result["task"]).toBe("echo.say");
+      const task = await taskOf(first.result["host"] ?? "");
+      expect(task).toMatchObject({ kind: "echo.say", assist: "allowed" });
+      expect(task?.prompt).toContain("echo.say");
+    } finally {
+      await first.stop();
+    }
+    const file = join(root, "task.json");
+    writeFileSync(file, JSON.stringify({ id: "t1", kind: "echo.say", assist: "none", prompt: "Say hello." }));
+    const given = await naraiServe(["dev", "--json", "--task", file], root);
+    try {
+      expect(given.result["task"]).toBe("echo.say");
+      expect(await taskOf(given.result["host"] ?? "")).toMatchObject({ id: "t1", prompt: "Say hello." });
+    } finally {
+      await given.stop();
+    }
+  });
+
   it("refuses a grant it doesn't know", () => {
     const r = narai(["dev", "--json", "--grant", "camera"], tool());
     expect(r.status).toBe(2);
     expect(errorOf(r.stderr)).toMatchObject({ code: "usage", message: expect.stringContaining("microphone") });
+  });
+});
+
+describe("the template with no task", () => {
+  // A tool can be opened with no task (a practice launch): its Answer says so in the page instead of doing nothing.
+  it("says in the page what its Answer did, or that there's no task to answer", () => {
+    const dir = scratch();
+    expect(narai(["init", "echo", "--publisher", "narai-dev", "--dir", "echo"], dir).status).toBe(0);
+    const html = readFileSync(join(dir, "echo", "src", "index.html"), "utf8");
+    expect(html).toMatch(/<p id="status"[^>]*aria-live="polite"/);
+    const js = readFileSync(join(dir, "echo", "src", "tool.js"), "utf8");
+    expect(js).not.toContain("if (!tool.task) return;");
+    expect(js).toContain(`$("status").textContent`);
   });
 });
 

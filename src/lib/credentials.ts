@@ -31,7 +31,12 @@ async function entry(naraiUrl: string) {
   } catch (error) {
     throw new KeychainUnavailableError(error);
   }
-  return new keyring.AsyncEntry(keychainService(naraiUrl), ACCOUNT);
+  // a Linux machine with no Secret Service fails here, as the entry is made
+  try {
+    return new keyring.AsyncEntry(keychainService(naraiUrl), ACCOUNT);
+  } catch (error) {
+    throw new KeychainUnavailableError(error);
+  }
 }
 
 async function guarded<T>(action: () => Promise<T>): Promise<T> {

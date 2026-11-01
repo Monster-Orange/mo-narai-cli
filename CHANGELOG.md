@@ -3,6 +3,20 @@
 0.x: the contract (the manifest, the wire, the registry's API) can still change between minor versions; this file says
 how. A version's entry lists what you have to change, first.
 
+## 0.2.1
+
+Nothing to change. A first `npm run dev` now shows the tool working:
+
+- `narai dev` without `--task` starts the tool on a sample task of the manifest's first answer kind, as a lesson's step
+  would; `--task <file>` still starts another. Its JSON result says which (`task`).
+- It opens the host's address in your browser (`--no-open` doesn't) and says that it runs on this machine only: a tool
+  reaches Narai's lessons with `narai login`, `narai tools register` and `narai tools push`.
+- The template's page says what its buttons did, and with no task, that there is none to answer (a new
+  `<p id="status">`). A tool made before keeps working; copy the change if you like.
+- A certificate Node can't verify is said as such, with its code, in place of "fetch failed". For a local Narai signed by
+  your own CA, set `NODE_EXTRA_CA_CERTS` to that CA's file.
+- A Linux machine with no keychain gets "the OS keychain isn't available … set NARAI_TOKEN", never an unexpected error.
+
 ## 0.2.0
 
 Nothing to change in a tool made by `narai init`. It runs on `@michinarai/sdk` 0.3.0 now, so its rules apply to
