@@ -76,6 +76,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/tools/{publisher}/account-link": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Account Link
+         * @description The publisher's account linking: what its versions declare, how many learners are linked, and how its webhook
+         *     takes the account.unlinked event. Counts only.
+         */
+        get: operations["account_link_api_tools__publisher__account_link_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/tools/{publisher}/{name}": {
         parameters: {
             query?: never;
@@ -165,6 +186,34 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/tools/{publisher}/{name}/dev-origin": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Dev Origin
+         * @description The caller's live dev server origin for this tool, or 204 when there is none.
+         */
+        get: operations["get_dev_origin_api_tools__publisher___name__dev_origin_get"];
+        /**
+         * Set Dev Origin
+         * @description The caller's own dev server for this tool, for a while: their own lesson launches of a draft of it frame it.
+         */
+        put: operations["set_dev_origin_api_tools__publisher___name__dev_origin_put"];
+        post?: never;
+        /**
+         * Delete Dev Origin
+         * @description The caller's dev server origin for this tool ends now.
+         */
+        delete: operations["delete_dev_origin_api_tools__publisher___name__dev_origin_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/tools/{publisher}/{name}/versions/{version}/launches": {
         parameters: {
             query?: never;
@@ -238,6 +287,14 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** AccountLinkOut */
+        AccountLinkOut: {
+            /** Publisher */
+            publisher: string;
+            declared: components["schemas"]["LinkDeclared"];
+            links: components["schemas"]["LinkCounts"];
+            webhook: components["schemas"]["LinkWebhook"];
+        };
         /** CiTokenIn */
         CiTokenIn: {
             /** Label */
@@ -310,6 +367,29 @@ export interface components {
             /** Tokens */
             tokens: components["schemas"]["CiTokenOut"][];
         };
+        /** DevOriginIn */
+        DevOriginIn: {
+            /**
+             * Origin
+             * @description https://localhost:<port>, a loopback address, or a tunnel host
+             */
+            origin: string;
+            /**
+             * Ttl Seconds
+             * @description 8 hours when absent
+             */
+            ttl_seconds?: number | null;
+        };
+        /** DevOriginOut */
+        DevOriginOut: {
+            /** Origin */
+            origin: string;
+            /**
+             * Expires At
+             * Format: date-time
+             */
+            expires_at: string;
+        };
         /** HTTPValidationError */
         HTTPValidationError: {
             /** Detail */
@@ -331,6 +411,64 @@ export interface components {
              * Format: date-time
              */
             expires_at: string;
+        };
+        /** LinkCounts */
+        LinkCounts: {
+            /**
+             * Live
+             * @description learners linked now
+             */
+            live: number;
+        };
+        /** LinkDeclaration */
+        LinkDeclaration: {
+            /**
+             * Tool
+             * @description publisher/name: the tool whose version declares it
+             */
+            tool: string;
+            /** Version */
+            version: string;
+            /** Url */
+            url: string;
+            /** Client Id */
+            client_id: string;
+            /** Webhook */
+            webhook: string;
+            /**
+             * One Origin
+             * @description url, client_id and webhook share one origin, as linking requires
+             */
+            one_origin: boolean;
+        };
+        /** LinkDeclared */
+        LinkDeclared: {
+            /** @description the newest reviewed version's: the one learners link with */
+            reviewed: components["schemas"]["LinkDeclaration"] | null;
+            /** @description a draft newer than it that declares one, not yet in use */
+            draft: components["schemas"]["LinkDeclaration"] | null;
+        };
+        /** LinkWebhook */
+        LinkWebhook: {
+            /**
+             * Last Outcome
+             * @description the newest try of an account.unlinked event
+             */
+            last_outcome: ("delivered" | "retrying" | "undelivered") | null;
+            /** Last At */
+            last_at: string | null;
+            /**
+             * Retrying
+             * @description events that failed and will be tried again
+             */
+            retrying: number;
+            /**
+             * Undelivered
+             * @description events given up on after the last try
+             */
+            undelivered: number;
+            /** Last Undelivered At */
+            last_undelivered_at: string | null;
         };
         /** PublisherIn */
         PublisherIn: {
@@ -921,6 +1059,82 @@ export interface operations {
             };
         };
     };
+    account_link_api_tools__publisher__account_link_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                publisher: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AccountLinkOut"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Refusal"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Refusal"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Refusal"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Refusal"];
+                };
+            };
+            /** @description Request Entity Too Large */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Refusal"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Refusal"];
+                };
+            };
+        };
+    };
     get_tool_api_tools__publisher___name__get: {
         parameters: {
             query?: never;
@@ -1328,6 +1542,239 @@ export interface operations {
                 publisher: string;
                 name: string;
                 token_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Refusal"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Refusal"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Refusal"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Refusal"];
+                };
+            };
+            /** @description Request Entity Too Large */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Refusal"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Refusal"];
+                };
+            };
+        };
+    };
+    get_dev_origin_api_tools__publisher___name__dev_origin_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                publisher: string;
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DevOriginOut"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Refusal"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Refusal"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Refusal"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Refusal"];
+                };
+            };
+            /** @description Request Entity Too Large */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Refusal"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Refusal"];
+                };
+            };
+        };
+    };
+    set_dev_origin_api_tools__publisher___name__dev_origin_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                publisher: string;
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DevOriginIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DevOriginOut"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Refusal"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Refusal"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Refusal"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Refusal"];
+                };
+            };
+            /** @description Request Entity Too Large */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Refusal"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Refusal"];
+                };
+            };
+        };
+    };
+    delete_dev_origin_api_tools__publisher___name__dev_origin_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                publisher: string;
+                name: string;
             };
             cookie?: never;
         };

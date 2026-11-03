@@ -3,10 +3,21 @@ import { resolve } from "node:path";
 import { Flags } from "@oclif/core";
 import type { Grant } from "@michinarai/sdk/host";
 import { startHarness, type HarnessOptions } from "@michinarai/sdk/harness";
-import { NaraiCommand } from "../base-command.js";
+import { NARAI_URL, NaraiCommand, naraiOrigin } from "../base-command.js";
 import { deps } from "../lib/deps.js";
 import { NaraiError } from "../lib/errors.js";
+import { startLaunch, type Launch } from "../lib/launch.js";
 import { checkedManifest, toolRoot } from "../lib/project.js";
+
+/** `--launch beta`: Narai's beta; any other value is a Narai's address. */
+const launchAt = (given: string): string => naraiOrigin(given === "beta" ? NARAI_URL : given);
+
+/** Until Ctrl-C (or a SIGTERM), then `stop`. */
+const untilStopped = (stop: () => Promise<void>): Promise<void> => new Promise<void>((done) => {
+  const end = () => { void stop().then(done); };
+  process.once("SIGINT", end);
+  process.once("SIGTERM", end);
+});
 
 /** A learner's id with a publisher, as narai.tool.start carries it. */
 const SUBJECT = /^[A-Za-z0-9_-]{43}$/;
@@ -47,11 +58,22 @@ export default class Dev extends NaraiCommand<typeof Dev> {
       description: "For testing only: start the tool as for a learner who linked their account with your publisher and chose to let its tools know them (tool.start.subject, 43 URL-safe characters). Only a manifest that declares surfaces.account_link gets it, as in a lesson.",
     }),
     "no-open": Flags.boolean({ description: "Print the host's address; don't open it." }),
+    launch: Flags.string({
+      description: "Frame this dev server in your own lessons on a Narai (beta, or a Narai's address) instead of the local harness: it serves the built files over https where Narai's frame opens them, names that origin for the tool while it runs, and ends it on Ctrl-C. Needs narai login and a pushed draft of the tool.",
+    }),
+    origin: Flags.string({
+      description: "With --launch: a tunnel's https address to name instead of https://localhost; the files are served over plain http on --tool-port for the tunnel to forward.",
+      dependsOn: ["launch"],
+    }),
   };
 
   async run(): Promise<void> {
     const root = await toolRoot(process.cwd());
     const manifest = await checkedManifest(root);
+    if (this.flags.launch !== undefined) {
+      await this.launch(manifest, resolve(root, this.flags.dir));
+      return;
+    }
     const options: HarnessOptions = { manifest, toolDir: resolve(root, this.flags.dir) };
     if (this.flags.port !== undefined) options.hostPort = this.flags.port;
     if (this.flags["tool-port"] !== undefined) options.toolPort = this.flags["tool-port"];
@@ -87,10 +109,33 @@ export default class Dev extends NaraiCommand<typeof Dev> {
     ]);
     if (!this.out.json && !this.flags["no-open"]) deps.openBrowser(harness.hostUrl);
     this.out.progress("Ctrl-C to stop");
-    await new Promise<void>((done) => {
-      const stop = () => { void harness.close().then(done); };
-      process.once("SIGINT", stop);
-      process.once("SIGTERM", stop);
+    await untilStopped(() => harness.close());
+  }
+
+  /** `--launch`: the dev server in the developer's own lessons on a Narai, until Ctrl-C. */
+  private async launch(manifest: HarnessOptions["manifest"], toolDir: string): Promise<void> {
+    const origin = this.flags.origin;
+    if (origin !== undefined && !/^https:\/\//i.test(origin)) throw new NaraiError(`--origin ${origin}: a tunnel's https address`, "bad_origin", 2);
+    const narai = launchAt(this.flags.launch ?? "beta");
+    const started: Launch = await startLaunch({
+      narai, manifest, toolDir, progress: (line) => this.out.progress(line),
+      ...(origin !== undefined ? { origin } : {}),
+      ...(this.flags["tool-port"] !== undefined ? { port: this.flags["tool-port"] } : {}),
     });
+    const { end, ...result } = started;
+    const host = new URL(narai).host;
+    this.out.result(result, () => [
+      `Your dev server is framed in your own lessons on ${host} until Ctrl-C (at most until ${started.expires_at}).`,
+      `framed  ${started.framed}`,
+      ...(origin ? [`local   ${started.local} (point the tunnel here)`] : []),
+      ...(started.lessons === null
+        ? [`Open any lesson on ${host} whose step uses ${manifest.id}: a draft the step's range takes frames your dev server. ${narai}/learn`]
+        : started.lessons.length
+          ? started.lessons.map((l) => `open ${l.course} › ${l.step}: ${l.url}${l.listed ? "" : " (not listed)"}`)
+          : [`No lesson on ${host} uses ${manifest.id} yet: add the tool to a step of one of your courses.`]),
+      "Only your own launches of a draft see it.",
+    ]);
+    this.out.progress("Ctrl-C to stop");
+    await untilStopped(end);
   }
 }
