@@ -3,6 +3,17 @@
 0.x: the contract (the manifest, the wire, the registry's API) can still change between minor versions; this file says
 how. A version's entry lists what you have to change, first.
 
+## 0.3.0
+
+Nothing to change. The SDK is 0.3.5.
+
+- `narai dev --launch beta` frames your dev server in your own lessons on Narai while you change the tool, in place of
+  your uploaded files. It serves the built files over https where Narai's frame opens them (mkcert's certificate for
+  localhost, or `--origin https://<tunnel>` for a tunnel, served over http on `--tool-port`), names that origin for the
+  tool, prints the lessons that use it, and ends it on Ctrl-C. It needs `narai login`, a registered tool and a pushed
+  draft. A version Narai has reviewed is refused (`needs_draft`), and no mkcert without `--origin` is `no_mkcert`.
+  `--launch` also takes a Narai's address.
+
 ## 0.2.4
 
 Nothing to change. A tool made by an earlier `narai init` can add the rule to its own AGENTS.md.

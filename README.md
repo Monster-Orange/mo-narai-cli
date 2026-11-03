@@ -87,6 +87,31 @@ narai dev --grant microphone             # as a step that grants the microphone:
 narai dev --subject <43 characters>      # for testing: a linked learner's tool.start.subject, only with surfaces.account_link
 ```
 
+### Your dev server in a real lesson
+
+`narai dev --launch beta` frames your dev server in your own lessons on Narai while you change the tool, in place of
+your uploaded files. Only your own launches of a draft see it. It runs until Ctrl-C, or for 8 hours at most.
+
+```sh
+narai login && narai tools register && narai tools push    # once: a registered tool and a pushed draft
+narai dev --launch beta                                     # https://localhost, with mkcert's certificate
+narai dev --launch beta --origin https://<your tunnel>     # or a tunnel's address; it forwards to --tool-port
+```
+
+The command does three things:
+1. It serves the built files (`--dir`, default `dist`) where Narai's frame opens them: under the version for a bundle
+   Narai hosts, else at the embed URL's path.
+2. It names that origin for the tool.
+3. It prints the lessons that use the tool, or says where to look on a Narai that doesn't list them yet.
+
+On Ctrl-C it ends the dev server's turn.
+
+A lesson that would open a reviewed version is refused while a dev server is named: push a draft the step's range
+takes. The certificate comes from [mkcert](https://github.com/FiloSottile/mkcert). Run `mkcert -install` once
+yourself so your browser trusts it; the CLI never changes your trust store. The SDK's
+[Your dev server in a real lesson](https://github.com/Monster-Orange/mo-narai-sdk/blob/main/docs/dev-in-a-lesson.md)
+has the paths and the API.
+
 **`narai login`** signs in to Narai in the browser. The answer comes back to this machine only (127.0.0.1), and the
 session stays in the OS keychain. **`narai logout`** revokes it.
 

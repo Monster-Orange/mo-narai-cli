@@ -8,10 +8,14 @@ export interface FakeRegistry {
   url: string;
   token: string;
   orgs: { org_id: string; org_name: string; slug: string | null; name: string | null; url: string | null }[];
-  tools: Map<string, { id: string; name: string; versions: Map<string, { bundle_digest: string; files: Map<string, Buffer> }> }>;
+  tools: Map<string, { id: string; name: string; versions: Map<string, { bundle_digest: string; files: Map<string, Buffer>; status?: string }> }>;
   calls: string[];
   ciTokens: { id: string; label: string | null; env: string; scopes: string[]; expires_at: string; revoked_at: string | null; token: string }[];
   off: boolean;
+  /** The caller's dev server for a tool (dev-origin), by tool id. */
+  devOrigins: Map<string, { origin: string; expires_at: string }>;
+  /** The lessons whose step uses a tool, by tool id; null: a Narai that doesn't serve the route yet. */
+  lessons: Map<string, { course: string; step: string; version: string; listed: boolean; link: string }[]> | null;
   /** A route this Narai doesn't serve yet: its web framework answers 404 `{"detail": "Not Found"}`, no refusal. */
   missing: ((method: string, parts: string[]) => boolean) | null;
   close(): Promise<void>;
@@ -19,7 +23,7 @@ export interface FakeRegistry {
 
 export async function fakeRegistry(): Promise<FakeRegistry> {
   const state: FakeRegistry = {
-    url: "", token: "test-token", calls: [], ciTokens: [], off: false, missing: null, tools: new Map(),
+    url: "", token: "test-token", calls: [], ciTokens: [], off: false, missing: null, tools: new Map(), devOrigins: new Map(), lessons: null,
     orgs: [{ org_id: "org-1", org_name: "Narai Dev", slug: null, name: null, url: null }, { org_id: "org-2", org_name: "Other", slug: "other", name: "Other", url: "https://other.example" }],
     close: async () => undefined,
   };
@@ -68,9 +72,27 @@ export async function fakeRegistry(): Promise<FakeRegistry> {
         return { status: 204, body: null };
       }
     }
+    if (versions === "dev-origin" && !version) {
+      if (method === "PUT") {
+        const asked = JSON.parse(body.toString()) as { origin: string; ttl_seconds?: number };
+        const url = URL.canParse(asked.origin) ? new URL(asked.origin) : null;
+        if (!url || url.protocol !== "https:" || url.pathname !== "/" || url.search || url.hash) {
+          return refuse(422, "origin_invalid", "not a dev origin", ["https, an origin only: localhost, a loopback address or a named host"]);
+        }
+        const kept = { origin: url.origin, expires_at: "2026-11-03T09:00:00Z" };
+        state.devOrigins.set(tool.id, kept);
+        return { status: 200, body: kept };
+      }
+      if (method === "GET") { const kept = state.devOrigins.get(tool.id); return kept ? { status: 200, body: kept } : { status: 204, body: null }; }
+      if (method === "DELETE") { state.devOrigins.delete(tool.id); return { status: 204, body: null }; }
+    }
+    if (versions === "lessons" && !version && method === "GET") {
+      if (!state.lessons) return { status: 404, body: { detail: "Not Found" } };
+      return { status: 200, body: { lessons: state.lessons.get(tool.id) ?? [] } };
+    }
     if (versions === "versions" && version && method === "GET") {
       const v = tool.versions.get(version);
-      return v ? { status: 200, body: { id: version, version, status: "draft", bundle_digest: v.bundle_digest, manifest: {} } } : refuse(404, "not_found", "no such version");
+      return v ? { status: 200, body: { id: version, version, status: v.status ?? "draft", bundle_digest: v.bundle_digest, manifest: {} } } : refuse(404, "not_found", "no such version");
     }
     if (versions === "versions" && !version && method === "POST") {
       const form = await new Request("http://x", { method: "POST", headers: { "content-type": headers["content-type"] ?? "" }, body }).formData();

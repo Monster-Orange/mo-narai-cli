@@ -9,6 +9,14 @@ export type ArgsOf<T extends typeof Command> = Interfaces.InferredArgs<T["args"]
 /** Narai's own address: the beta, where Narai runs today (the developer beta included). */
 export const NARAI_URL = "https://beta.michinar.ai";
 
+/** A Narai's origin from its address: https, or plain http on this machine (a local Narai, a test's). */
+export function naraiOrigin(address: string): string {
+  const url = new URL(address);
+  const local = url.protocol === "http:" && ["localhost", "127.0.0.1"].includes(url.hostname);
+  if (url.protocol !== "https:" && !local) throw new NaraiError(`${url.origin} isn't https`, "insecure_url");
+  return url.origin;
+}
+
 /** Every command: the global flags, one output (results to stdout, progress to stderr), and every failure mapped to
  *  the exit codes: 0 ok, 1 error, 2 usage, 3 auth. */
 export abstract class NaraiCommand<T extends typeof Command = typeof Command> extends Command {
@@ -34,10 +42,7 @@ export abstract class NaraiCommand<T extends typeof Command = typeof Command> ex
 
   /** The Narai this command talks to: `--narai-url`, else NARAI_URL, else Narai. No trailing slash. */
   protected get naraiUrl(): string {
-    const url = new URL(this.flags["narai-url"] ?? process.env["NARAI_URL"] ?? NARAI_URL);
-    const local = url.protocol === "http:" && ["localhost", "127.0.0.1"].includes(url.hostname);
-    if (url.protocol !== "https:" && !local) throw new NaraiError(`${url.origin} isn't https`, "insecure_url");
-    return url.origin;
+    return naraiOrigin(this.flags["narai-url"] ?? process.env["NARAI_URL"] ?? NARAI_URL);
   }
 
   /** Prompts only with a person at the keyboard. */

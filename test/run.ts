@@ -16,8 +16,8 @@ export function narai(args: string[], cwd: string, env: Record<string, string> =
 }
 
 /** A long-running `narai` (dev): resolves with its first stdout document and the process to stop. */
-export function naraiServe(args: string[], cwd: string): Promise<{ result: Record<string, string>; stop: () => Promise<void> }> {
-  const child = spawn(process.execPath, [BIN, ...args], { cwd, stdio: ["ignore", "pipe", "pipe"] });
+export function naraiServe(args: string[], cwd: string, env: Record<string, string> = {}): Promise<{ result: Record<string, string>; stop: () => Promise<void> }> {
+  const child = spawn(process.execPath, [BIN, ...args], { cwd, env: { ...process.env, ...env }, stdio: ["ignore", "pipe", "pipe"] });
   let out = "";
   let err = "";
   return new Promise((resolve, reject) => {
